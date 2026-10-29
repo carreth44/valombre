@@ -1,0 +1,458 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Le manoir de Valombre</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&display=swap" rel="stylesheet">
+<style>
+:root{
+  --night:#0d0812; --night2:#1a1024; --plum:#2b1b33; --ink:#050307;
+  --pumpkin:#ff8a2a; --ember:#c4521b; --bone:#e9dcc2; --ash:#9c8ea3; --moss:#6f8a5a;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%;background:var(--night);color:var(--bone);font-family:'IM Fell English',Georgia,'Times New Roman',serif}
+body{background:radial-gradient(ellipse at 50% -10%,#3a2147 0,transparent 55%),var(--night);min-height:100vh}
+main{max-width:900px;margin:0 auto;padding:16px}
+h1,h2,.sc{font-family:'IM Fell English SC',Georgia,serif;font-weight:normal;letter-spacing:.04em}
+button{font:inherit;cursor:pointer}
+.view{display:none}.view.on{display:block}
+.btn{background:transparent;color:var(--bone);border:1px solid #6b5873;border-radius:4px;padding:8px 14px;font-size:1.05rem}
+.btn:hover,.btn:focus-visible{border-color:var(--pumpkin);color:#fff;outline:none}
+.btn.main{background:linear-gradient(#2b1408,#170a04);border-color:var(--ember);color:#ffd2a6;font-size:1.25rem;padding:12px 26px;box-shadow:0 0 24px rgba(255,138,42,.15)}
+.muted{color:var(--ash)}
+
+/* ---- Titre ---- */
+#title{text-align:center;padding-top:6vh}
+#title h1{font-size:clamp(2.2rem,8vw,4rem);margin:.2em 0 .1em;color:#f3e3c6;text-shadow:0 0 30px rgba(255,138,42,.25)}
+#title .date{font-style:italic;color:var(--ash);font-size:1.2rem}
+#title svg{width:min(100%,520px);margin:18px auto 8px;display:block}
+#title p.story{max-width:560px;margin:10px auto 26px;line-height:1.55;font-size:1.1rem}
+#title .actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+
+/* ---- Barre ---- */
+.bar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.bar h2{margin:0;font-size:clamp(1.3rem,4.6vw,1.8rem)}
+.bar .tools{display:flex;gap:8px}
+
+/* ---- Plan ---- */
+#planSvg{width:100%;display:block}
+#planSvg .room{cursor:pointer}
+#planSvg .room rect{transition:fill .3s}
+#planSvg .room:hover rect.r,#planSvg .room:focus rect.r{stroke:var(--pumpkin)}
+#planSvg text{font-family:'IM Fell English SC',Georgia,serif;pointer-events:none}
+
+/* ---- Pièce ---- */
+.stage{position:relative;border-radius:6px;overflow:hidden;box-shadow:0 0 0 1px #3d2a46,0 14px 40px rgba(0,0,0,.6)}
+#roomSvg{width:100%;display:block;background:#000}
+#roomSvg.dark{touch-action:none;cursor:none}
+#roomSvg .hs{fill:transparent;cursor:pointer}
+#roomSvg .hs:hover{fill:rgba(255,138,42,.06)}
+#roomSvg.dark .hs:hover{fill:transparent}
+.narr{min-height:5.2em;margin-top:12px;padding:12px 16px;background:linear-gradient(#170e1c,#120a16);border-left:3px solid var(--ember);line-height:1.5;font-size:1.08rem}
+.narr em{color:var(--pumpkin);font-style:normal}
+.narr a{color:var(--pumpkin)}
+
+/* ---- Dialogues ---- */
+dialog{background:#160d1b;color:var(--bone);border:1px solid #5b4663;border-radius:8px;padding:20px;max-width:min(92vw,440px);box-shadow:0 20px 60px rgba(0,0,0,.8)}
+dialog::backdrop{background:rgba(5,3,7,.75)}
+dialog h3{font-family:'IM Fell English SC',Georgia,serif;font-weight:normal;margin:0 0 8px;font-size:1.4rem}
+dialog input{width:100%;font:inherit;font-size:1.4rem;letter-spacing:.15em;text-transform:uppercase;text-align:center;padding:10px;margin:12px 0;background:#0b060e;color:#ffd9b3;border:1px solid #6b5873;border-radius:4px;outline:none}
+dialog input:focus{border-color:var(--pumpkin)}
+dialog .row{display:flex;gap:10px;justify-content:flex-end}
+dialog .msg{min-height:1.4em;color:var(--pumpkin);font-style:italic}
+.shake{animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-8px)}50%{transform:translateX(8px)}75%{transform:translateX(-4px)}}
+#clockDlg svg{width:min(70vw,300px);display:block;margin:0 auto}
+#readDlg{max-width:min(94vw,640px)}
+#readBody{max-height:min(62vh,560px);overflow-y:auto;padding:4px 10px 4px 2px;line-height:1.6;font-size:1.06rem;text-align:justify;hyphens:auto}
+#readBody p{margin:0 0 .9em}
+#readBody em{color:var(--pumpkin);font-style:normal}
+#readBody .n{font-family:'IM Fell English SC',Georgia,serif;color:var(--pumpkin);margin-right:.2em}
+#readBody .torn{font-style:italic;color:var(--ash)}
+#readBody svg{width:100%;display:block;margin:6px 0 12px;background:#e9dcc2;border-radius:3px}
+footer{margin-top:22px;text-align:center;font-size:.9rem}
+footer button{background:none;border:0;color:var(--ash);text-decoration:underline;font-size:.9rem}
+</style>
+</head>
+<body>
+<main>
+  <!-- Écran titre -->
+  <section id="title" class="view on">
+    <h1>Le manoir de Valombre</h1>
+    <div class="date">Nuit du 31 octobre 1924</div>
+    <svg viewBox="0 0 520 260" aria-hidden="true">
+      <defs><radialGradient id="moon"><stop offset="0" stop-color="#fff4d6"/><stop offset=".6" stop-color="#f3d9a0"/><stop offset="1" stop-color="#f3d9a0" stop-opacity="0"/></radialGradient></defs>
+      <circle cx="400" cy="70" r="70" fill="url(#moon)" opacity=".9"/>
+      <path fill="#050307" d="M0 260V215q40-12 80-4 30-30 60-6V130l70-55 70 55v-40h22v58l24 19v-37h70l40 40v40q50-20 120 8v57z"/>
+      <path fill="#050307" d="M205 75l5-30 5 30zM335 90h-14v-25h14z"/>
+      <g fill="#ffb05a" opacity=".85"><rect x="190" y="150" width="12" height="18"/><rect x="230" y="150" width="12" height="18" opacity=".35"/><rect x="330" y="185" width="10" height="15" opacity=".6"/></g>
+      <path fill="#050307" d="M60 215l-6-45-14-10 16 6-2-20 8 18 10-14-6 22 12 4-12 2 4 37zM470 225l-4-40-10-6 12 3 2-16 4 15 8-10-4 16z"/>
+      <g fill="none" stroke="#050307" stroke-width="2"><path d="M110 60q8-8 16 0q8-8 16 0"/><path d="M150 40q6-6 12 0q6-6 12 0"/></g>
+    </svg>
+    <p class="story">Cette nuit-là, la famille de Valombre s'est réunie pour une séance de spiritisme. Au matin, le manoir était vide. Personne n'y est entré depuis cent ans.<br><span class="muted">La porte vient de s'entrouvrir.</span></p>
+    <div class="actions">
+      <button class="btn main" id="enter">Pousser la porte</button>
+    </div>
+  </section>
+
+  <!-- Plan -->
+  <section id="plan" class="view">
+    <div class="bar"><h2>Plan du manoir</h2><div class="tools"><button class="btn" id="unlockAny">Murmurer un mot</button></div></div>
+    <svg id="planSvg" viewBox="20 50 760 480" role="img" aria-label="Plan du manoir"></svg>
+    <p class="muted" style="text-align:center;margin:6px 0 0">Les portes s'ouvrent avec des mots. Touchez une pièce éclairée pour y entrer.</p>
+    <footer><button id="reset">Oublier ma visite</button></footer>
+  </section>
+
+  <!-- Pièce -->
+  <section id="room" class="view">
+    <div class="bar"><h2 id="roomTitle"></h2><div class="tools"><button class="btn" id="hintBtn" title="Un indice">Murmures</button><button class="btn" id="toPlan">Plan</button></div></div>
+    <div class="stage"><svg id="roomSvg" viewBox="0 0 800 500"></svg></div>
+    <div class="narr" id="narr" aria-live="polite"></div>
+  </section>
+</main>
+
+<dialog id="lockDlg">
+  <h3 id="lockTitle">Une serrure</h3>
+  <div class="muted" id="lockText">Une voix vous souffle qu'un mot suffit.</div>
+  <form method="dialog" id="lockForm">
+    <input id="lockInput" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="30" aria-label="Mot">
+    <div class="msg" id="lockMsg"></div>
+    <div class="row"><button class="btn" value="cancel" formnovalidate>Reculer</button><button class="btn main" id="lockGo" value="go">Murmurer</button></div>
+  </form>
+</dialog>
+
+<dialog id="clockDlg">
+  <div id="clockBig"></div>
+  <p style="text-align:center;margin:10px 0 14px" class="muted" id="clockText">L'horloge s'est arrêtée.</p>
+  <form method="dialog" class="row"><button class="btn">Fermer</button></form>
+</dialog>
+
+<dialog id="askDlg">
+  <h3>Poser une question</h3>
+  <div class="muted" id="askText">Vos doigts effleurent la planchette. Elle est tiède.</div>
+  <form method="dialog" id="askForm">
+    <input id="askInput" autocomplete="off" spellcheck="false" maxlength="80" aria-label="Question" style="text-transform:none;letter-spacing:.02em;font-size:1.15rem">
+    <div class="row"><button class="btn" value="cancel" formnovalidate>Lâcher la planchette</button><button class="btn main" value="go">Demander</button></div>
+  </form>
+</dialog>
+
+<dialog id="readDlg">
+  <h3 id="readTitle"></h3>
+  <div id="readBody"></div>
+  <form method="dialog" class="row" style="margin-top:12px"><button class="btn">Refermer</button></form>
+</dialog>
+
+<script src="rooms.js"></script>
+<script>
+'use strict';
+// ====== Plan (doit correspondre à tools/plan.mjs) ======
+const PLAN = [
+  { id: 'grenier',      name: 'Grenier',            x: 300, y: 92,  w: 200, h: 88 },
+  { id: 'chambre',      name: "Chambre de l'enfant", label: ['Chambre', "de l'enfant"], x: 250, y: 196, w: 300, h: 92 },
+  { id: 'bibliotheque', name: 'Bibliothèque', label: ['Biblio-', 'thèque'], x: 70, y: 304, w: 170, h: 100 },
+  { id: 'hall',         name: 'Hall',               x: 240, y: 304, w: 160, h: 100 },
+  { id: 'musique',      name: 'Salon de musique', label: ['Salon de', 'musique'], x: 400, y: 304, w: 170, h: 100 },
+  { id: 'salle',        name: 'Salle à manger', label: ['Salle à', 'manger'], x: 570, y: 304, w: 160, h: 100 },
+  { id: 'labo',         name: 'Laboratoire',        x: 250, y: 430, w: 300, h: 84 },
+];
+const OPEN_KEY = 'ENTRER';
+const NS = 'http://www.w3.org/2000/svg';
+const $ = id => document.getElementById(id);
+
+// ====== Crypto ======
+const enc = new TextEncoder();
+const unb64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+const toHex = b => [...b].map(x => x.toString(16).padStart(2, '0')).join('');
+const norm = s => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+async function openRoom(word) {
+  const D = window.MANOIR; if (!D) return null;
+  const base = await crypto.subtle.importKey('raw', enc.encode(word), 'PBKDF2', false, ['deriveBits']);
+  const bits = new Uint8Array(await crypto.subtle.deriveBits({ name: 'PBKDF2', salt: unb64(D.salt), iterations: D.iter, hash: 'SHA-256' }, base, 384));
+  const e = D.rooms[toHex(bits.slice(0, 16))]; if (!e) return null;
+  const key = await crypto.subtle.importKey('raw', bits.slice(16), 'AES-GCM', false, ['decrypt']);
+  try { return JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: unb64(e.iv) }, key, unb64(e.data)))); }
+  catch (err) { return null; }
+}
+
+// ====== Progression ======
+const STORE = 'valombre-mots';
+const rooms = {};          // id -> données déchiffrées
+let words = [];
+try { words = JSON.parse(localStorage.getItem(STORE)) || []; } catch (e) {}
+const saveWords = () => { try { localStorage.setItem(STORE, JSON.stringify(words)); } catch (e) {} };
+// onlyId : la serrure d'une porte précise n'accepte que le mot de cette pièce (un autre mot valable est ignoré)
+async function tryWord(raw, onlyId) {
+  const w = norm(raw); if (!w) return null;
+  const r = await openRoom(w); if (!r || (onlyId && r.id !== onlyId)) return null;
+  rooms[r.id] = r;
+  if (w !== OPEN_KEY && !words.includes(w)) { words.push(w); saveWords(); }
+  return r;
+}
+async function restore() {
+  await tryWord(OPEN_KEY);
+  for (const w of words) await openRoom(w).then(r => { if (r) rooms[r.id] = r; });
+}
+
+// ====== Vues ======
+function show(v) { document.querySelectorAll('.view').forEach(s => s.classList.toggle('on', s.id === v)); window.scrollTo(0, 0); }
+
+// ====== Plan ======
+function el(tag, attrs = {}, parent) {
+  const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(e); return e;
+}
+function drawPlan() {
+  const s = $('planSvg'); s.innerHTML = '';
+  // silhouette de la maison
+  el('path', { d: 'M40 520V300h20v-12h680v12h20v220z', fill: '#120a16', stroke: '#3d2a46', 'stroke-width': 2 }, s);
+  el('path', { d: 'M230 296V190h340v106z', fill: '#120a16', stroke: '#3d2a46', 'stroke-width': 2 }, s);
+  el('path', { d: 'M210 190L400 60 590 190z', fill: '#120a16', stroke: '#3d2a46', 'stroke-width': 2 }, s);
+  el('path', { d: 'M230 420h340v100H230z', fill: '#0d0812', stroke: '#3d2a46', 'stroke-width': 2, 'stroke-dasharray': '6 5' }, s);
+  el('line', { x1: 20, y1: 418, x2: 780, y2: 418, stroke: '#2a1d30', 'stroke-width': 3 }, s);
+  for (const p of PLAN) {
+    const open = !!rooms[p.id];
+    const g = el('g', { class: 'room', tabindex: 0, role: 'button', 'aria-label': p.name + (open ? '' : ' (verrouillée)') }, s);
+    el('rect', { class: 'r', x: p.x + 4, y: p.y + 4, width: p.w - 8, height: p.h - 8, rx: 3,
+      fill: open ? '#3a2412' : '#0a060c', stroke: open ? '#c4521b' : '#3d2a46', 'stroke-width': 2 }, g);
+    if (open) el('rect', { x: p.x + 4, y: p.y + 4, width: p.w - 8, height: p.h - 8, rx: 3, fill: 'url(#warmPlan)', opacity: .9 }, g);
+    const lines = p.label || [p.name], fs = 25, lh = 26;
+    const top = p.y + p.h / 2 - (lines.length - 1) * lh / 2 + 8 - (open ? 0 : 14);
+    lines.forEach((ln, i) => {
+      el('text', { x: p.x + p.w / 2, y: top + i * lh, 'text-anchor': 'middle', fill: open ? '#ffd9b3' : '#6b5873', 'font-size': fs }, g).textContent = ln;
+    });
+    if (!open) {
+      const lx = p.x + p.w / 2, ly = top + (lines.length - 1) * lh + 20;
+      el('path', { d: `M${lx - 7} ${ly}v-5a7 7 0 0 1 14 0v5`, fill: 'none', stroke: '#5b4663', 'stroke-width': 2 }, g);
+      el('rect', { x: lx - 10, y: ly, width: 20, height: 14, rx: 2, fill: '#5b4663' }, g);
+    }
+    const go = () => open ? enterRoom(p.id) : askLock(p);
+    g.addEventListener('click', go);
+    g.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
+  }
+  const defs = el('defs', {}, s);
+  const rg = el('radialGradient', { id: 'warmPlan' }, defs);
+  el('stop', { offset: 0, 'stop-color': '#ff8a2a', 'stop-opacity': .35 }, rg);
+  el('stop', { offset: 1, 'stop-color': '#ff8a2a', 'stop-opacity': 0 }, rg);
+}
+
+// ====== Serrure ======
+let lockTarget = null;
+function askLock(p) {
+  lockTarget = p || null;
+  $('lockTitle').textContent = p ? p.name : 'Murmurer un mot';
+  $('lockText').textContent = p ? 'La porte est verrouillée. Une voix vous souffle qu\'un mot suffit.' : 'Quel mot voulez-vous murmurer aux portes du manoir ?';
+  $('lockInput').value = ''; $('lockMsg').textContent = '';
+  $('lockDlg').showModal(); $('lockInput').focus();
+}
+$('lockForm').addEventListener('submit', async e => {
+  if (e.submitter && e.submitter.value === 'cancel') return;
+  e.preventDefault();
+  const btn = $('lockGo'); btn.disabled = true; $('lockMsg').textContent = '…';
+  const r = await tryWord($('lockInput').value, lockTarget && lockTarget.id);
+  btn.disabled = false;
+  if (!r) {
+    $('lockMsg').textContent = 'Rien ne bouge. Le silence vous répond.';
+    $('lockDlg').classList.remove('shake'); void $('lockDlg').offsetWidth; $('lockDlg').classList.add('shake');
+    return;
+  }
+  $('lockDlg').close();
+  drawPlan();
+  enterRoom(r.id, 'La serrure cède dans un grincement. ');
+});
+$('unlockAny').onclick = () => askLock(null);
+
+// ====== Horloges ======
+function clockSVG(cx, cy, r, h, m, big) {
+  const ah = ((h % 12) + m / 60) * 30 * Math.PI / 180, am = m * 6 * Math.PI / 180;
+  const hand = (a, len, w, col) => `<line x1="${cx}" y1="${cy}" x2="${(cx + Math.sin(a) * len).toFixed(1)}" y2="${(cy - Math.cos(a) * len).toFixed(1)}" stroke="${col}" stroke-width="${w}" stroke-linecap="round"/>`;
+  let ticks = '';
+  for (let i = 0; i < 60; i++) {
+    const a = i * 6 * Math.PI / 180, l = i % 5 ? r * .06 : r * .14;
+    if (!big && i % 5) continue;
+    ticks += `<line x1="${(cx + Math.sin(a) * (r * .9)).toFixed(1)}" y1="${(cy - Math.cos(a) * (r * .9)).toFixed(1)}" x2="${(cx + Math.sin(a) * (r * .9 - l)).toFixed(1)}" y2="${(cy - Math.cos(a) * (r * .9 - l)).toFixed(1)}" stroke="#2a1d1a" stroke-width="${i % 5 ? r * .012 : r * .035}"/>`;
+  }
+  let nums = '';
+  if (big) {
+    const R = ['XII', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI'];
+    R.forEach((t, i) => { const a = i * 30 * Math.PI / 180;
+      nums += `<text x="${(cx + Math.sin(a) * r * .66).toFixed(1)}" y="${(cy - Math.cos(a) * r * .66 + r * .07).toFixed(1)}" font-size="${(r * .17).toFixed(1)}" text-anchor="middle" fill="#2a1d1a" font-family="'IM Fell English SC',Georgia,serif">${t}</text>`; });
+  }
+  return `<g><circle cx="${cx}" cy="${cy}" r="${r}" fill="#d8c8a2" stroke="#3b2a1a" stroke-width="${r * .08}"/>
+    <circle cx="${cx}" cy="${cy}" r="${r * .92}" fill="none" stroke="#a8946a" stroke-width="${r * .02}"/>${ticks}${nums}
+    ${hand(ah, r * .5, r * .07, '#1a1110')}${hand(am, r * .78, r * .045, '#1a1110')}
+    <circle cx="${cx}" cy="${cy}" r="${r * .06}" fill="#1a1110"/></g>`;
+}
+function zoomClock(c) {
+  $('clockBig').innerHTML = `<svg viewBox="0 0 300 300">${clockSVG(150, 150, 140, c.h, c.m, true)}</svg>`;
+  $('clockText').textContent = c.text || "L'horloge s'est arrêtée.";
+  $('clockDlg').showModal();
+}
+
+// ====== Lecture (hotspot.read = { title, html }) ======
+function openRead(rd) {
+  $('readTitle').textContent = rd.title || '';
+  $('readBody').innerHTML = rd.html || '';
+  $('readDlg').showModal(); $('readBody').scrollTop = 0;
+}
+
+// ====== Son (hotspot.sound = { notes: [midi | [midi, temps] | null], tempo }) ======
+let actx = null;
+function pianoNote(m, t, d) {
+  const f = 440 * 2 ** ((m - 69) / 12);
+  const g = actx.createGain(); g.connect(actx.destination);
+  g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.25, t + .01);
+  g.gain.exponentialRampToValueAtTime(.001, t + d + 1.2);
+  for (const [mul, type, amp] of [[1, 'triangle', 1], [2, 'sine', .35], [3, 'sine', .12], [1.003, 'sine', .3]]) {
+    const o = actx.createOscillator(), og = actx.createGain();
+    o.type = type; o.frequency.value = f * mul; og.gain.value = amp;
+    o.connect(og).connect(g); o.start(t); o.stop(t + d + 1.3);
+  }
+}
+function playSound(snd) {
+  try { actx = actx || new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return; }
+  if (actx.state === 'suspended') actx.resume();
+  const beat = 60 / (snd.tempo || 90);
+  let t = actx.currentTime + .05;
+  for (const n of snd.notes || []) {
+    const [m, d = 1] = Array.isArray(n) ? n : [n];
+    if (m != null) pianoNote(m, t, d * beat);
+    t += d * beat;
+  }
+}
+
+// ====== Enregistrement (hotspot.audio = { data: base64, type, name, link }) ======
+let audioEl = null;
+function audioURL(a) {
+  if (!a._url) a._url = URL.createObjectURL(new Blob([unb64(a.data)], { type: a.type || 'audio/wav' }));
+  return a._url;
+}
+function stopAudio() { if (audioEl) { audioEl.pause(); audioEl = null; } }
+function playAudio(a) {
+  stopAudio();
+  audioEl = new Audio(audioURL(a)); audioEl.play().catch(() => {});
+  const link = document.createElement('a');
+  link.href = audioURL(a); link.download = a.name || 'enregistrement.wav'; link.textContent = a.link || "Emporter l'enregistrement";
+  $('narr').append(' ', link);
+}
+
+// ====== Planche ouija ======
+// room.ouija = { planchette: id du <g> à déplacer, rest: [x, y], pos: { A: [x, y], …, OUI: [x, y] },
+//                replies: [{ words: ['QUI', 'ES TU LA'], spell, text }], fallback: [spell, …] }
+// Les réponses sont essayées dans l'ordre ; un mot (ou groupe de mots) doit apparaître dans la question.
+let spelling = false;
+const wait = ms => new Promise(res => setTimeout(res, ms));
+const qWords = s => ' ' + s.normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase().replace(/[^A-Z]+/g, ' ').trim() + ' ';
+function askOuija() {
+  if (spelling || !cur || !cur.ouija) return;
+  $('askInput').value = ''; $('askDlg').showModal(); $('askInput').focus();
+}
+$('askForm').addEventListener('submit', e => {
+  if (e.submitter && e.submitter.value === 'cancel') return;
+  e.preventDefault();
+  const q = $('askInput').value.trim(); $('askDlg').close();
+  if (q) answerOuija(q);
+});
+async function answerOuija(q) {
+  const room = cur, o = room.ouija, Q = qWords(q);
+  const rep = o.replies.find(r => r.words.some(w => Q.includes(' ' + w + ' ')))
+    || { spell: o.fallback[Math.floor(Math.random() * o.fallback.length)] };
+  const s = $('roomSvg'), pl = s.querySelector('#' + o.planchette);
+  const steps = o.pos[rep.spell] ? [rep.spell] : [...rep.spell];
+  spelling = true;
+  let shown = '';
+  narr('<em>La planchette se met à glisser…</em>');
+  for (const t of steps) {
+    if (cur !== room) break;
+    const p = t === ' ' ? o.rest : o.pos[t]; if (!p) continue;
+    pl.style.transform = `translate(${p[0]}px, ${p[1]}px)`;
+    await wait(700);
+    if (t !== ' ') {
+      const f = el('circle', { cx: p[0], cy: p[1], r: 20, fill: '#ff8a2a', opacity: .45, 'pointer-events': 'none' }, s);
+      setTimeout(() => f.remove(), 500);
+    }
+    shown += t;
+    narr(`<em>La planchette épelle :</em> ${shown}`);
+    await wait(200);
+  }
+  spelling = false;
+  if (cur !== room) return;
+  pl.style.transform = `translate(${o.rest[0]}px, ${o.rest[1]}px)`;
+  if (rep.text) { await wait(600); if (cur === room) narr(rep.text); }
+}
+
+// ====== Pièce ======
+let cur = null, flicker = null;
+function narr(html) { $('narr').innerHTML = html; }
+function enterRoom(id, prefix = '') {
+  const r = rooms[id]; if (!r) return;
+  cur = r; stopAudio();
+  $('roomTitle').textContent = r.title;
+  const s = $('roomSvg');
+  s.classList.toggle('dark', !!r.dark);
+  let svg = `<defs>
+      <radialGradient id="lg"><stop offset="0" stop-color="#000"/><stop offset=".45" stop-color="#000"/><stop offset="1" stop-color="#fff"/></radialGradient>
+      <radialGradient id="warm"><stop offset="0" stop-color="#ffb366" stop-opacity=".28"/><stop offset="1" stop-color="#ffb366" stop-opacity="0"/></radialGradient>
+      <mask id="lm"><rect width="800" height="500" fill="#fff"/><circle id="lc" cx="400" cy="250" r="110" fill="url(#lg)"/></mask>
+    </defs>${r.svg}`;
+  if (r.clock) svg += clockSVG(r.clock.x, r.clock.y, r.clock.r, r.clock.h, r.clock.m, false);
+  if (r.dark) svg += `<circle id="glow" cx="400" cy="250" r="120" fill="url(#warm)" pointer-events="none"/>
+    <rect width="800" height="500" fill="#020104" mask="url(#lm)" pointer-events="none"/>`;
+  s.innerHTML = svg;
+  // zones cliquables (au-dessus de tout)
+  const hs = [...(r.hotspots || [])];
+  if (r.clock) hs.push({ x: r.clock.x - r.clock.r - 6, y: r.clock.y - r.clock.r - 6, w: 2 * r.clock.r + 12, h: 2 * r.clock.r + 12, clock: true, text: r.clock.text });
+  for (const h of hs) {
+    const rc = el('rect', { class: 'hs', x: h.x, y: h.y, width: h.w, height: h.h, tabindex: 0, role: 'button', 'aria-label': h.label || 'Examiner' }, s);
+    const act = () => {
+      if (h.clock) return zoomClock(r.clock);
+      if (h.door) { const p = PLAN.find(q => q.id === h.door); if (rooms[h.door]) return enterRoom(h.door); narr(h.text || ''); return askLock(p); }
+      narr(h.text || '');
+      if (h.sound) playSound(h.sound);
+      if (h.audio) playAudio(h.audio);
+      if (h.ask) askOuija();
+      if (h.read) openRead(h.read);
+    };
+    rc.addEventListener('click', act);
+    rc.addEventListener('keydown', e => { if (e.key === 'Enter') act(); });
+  }
+  if (r.dark) setupLantern(s); else stopLantern();
+  narr(prefix + r.intro);
+  show('room');
+}
+
+function setupLantern(s) {
+  const lc = s.querySelector('#lc'), glow = s.querySelector('#glow');
+  let x = 400, y = 250, base = 110;
+  const move = ev => {
+    const pt = s.createSVGPoint(); pt.x = ev.clientX; pt.y = ev.clientY;
+    const p = pt.matrixTransform(s.getScreenCTM().inverse());
+    x = p.x; y = p.y;
+    lc.setAttribute('cx', x); lc.setAttribute('cy', y); glow.setAttribute('cx', x); glow.setAttribute('cy', y);
+  };
+  s.onpointermove = move; s.onpointerdown = move;
+  stopLantern(true);
+  flicker = setInterval(() => {
+    const r = base + (Math.random() - .5) * 8;
+    lc.setAttribute('r', r.toFixed(1)); glow.setAttribute('r', (r + 12).toFixed(1));
+  }, 90);
+}
+function stopLantern(keepHandlers) {
+  clearInterval(flicker); flicker = null;
+  if (!keepHandlers) { const s = $('roomSvg'); s.onpointermove = null; s.onpointerdown = null; }
+}
+
+$('toPlan').onclick = () => { stopLantern(); stopAudio(); drawPlan(); show('plan'); };
+$('hintBtn').onclick = () => cur && narr('<em>Un murmure…</em> ' + (cur.hint || 'Le silence.'));
+$('enter').onclick = () => Object.keys(rooms).length > 1 ? (drawPlan(), show('plan')) : enterRoom('hall');
+$('reset').onclick = () => {
+  if (!confirm('Oublier tous les mots trouvés ?')) return;
+  words = []; saveWords(); for (const k in rooms) if (k !== 'hall') delete rooms[k]; drawPlan();
+};
+
+restore().then(() => { drawPlan(); if (Object.keys(rooms).length > 1) $('enter').textContent = 'Revenir au manoir'; });
+</script>
+</body>
+</html>
